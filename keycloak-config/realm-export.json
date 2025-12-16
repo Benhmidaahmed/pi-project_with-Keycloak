@@ -1,0 +1,151 @@
+{
+  "realm": "wassalni-realm",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 3600,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "roles": {
+    "realm": [
+      {
+        "name": "PASSENGER",
+        "description": "Passenger role for regular users"
+      },
+      {
+        "name": "DRIVER",
+        "description": "Driver role for drivers"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "wassalni-app",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "wassalni-secret-key-2024",
+      "redirectUris": [
+        "http://localhost:*",
+        "http://localhost:8084/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:*",
+        "*"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "attributes": {
+        "access.token.lifespan": "3600"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "passenger1",
+      "enabled": true,
+      "email": "passenger@wassalni.com",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Passenger",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PASSENGER"
+      ],
+      "attributes": {
+        "phoneNumber": [
+          "+21612345678"
+        ],
+        "userType": [
+          "PASSENGER"
+        ]
+      }
+    },
+    {
+      "username": "driver1",
+      "enabled": true,
+      "email": "driver@wassalni.com",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "Driver",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DRIVER"
+      ],
+      "attributes": {
+        "phoneNumber": [
+          "+21698765432"
+        ],
+        "userType": [
+          "DRIVER"
+        ],
+        "licenseNumber": [
+          "DRV123456"
+        ],
+        "vehicleNumber": [
+          "VEH789"
+        ],
+        "vehiclePlate": [
+          "TUN-1234"
+        ]
+      }
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@wassalni.com",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "attributes": {
+        "phoneNumber": [
+          "+21620000000"
+        ],
+        "userType": [
+          "ADMIN"
+        ]
+      }
+    }
+  ]
+}
