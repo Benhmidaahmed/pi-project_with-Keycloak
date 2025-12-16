@@ -4,6 +4,7 @@ import { noAuthGuard } from './core/guards/no-auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/user.model';
+import {AdminDashboardComponent} from "./features/admin/dashboard/admin-dashboard.component";
 
 /**
  * Application routing configuration

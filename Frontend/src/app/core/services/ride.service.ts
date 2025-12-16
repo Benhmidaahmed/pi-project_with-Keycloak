@@ -32,6 +32,7 @@ interface BackendCreateRideRequest {
   departureDate: string;
   availableSeats: number;
   driverId: string;
+  pricePerSeat?: number;
 }
 
 /**
@@ -140,6 +141,10 @@ export class RideService {
       driverId: rideData.driverId || ''
     };
 
+    if (rideData.pricePerSeat !== undefined && rideData.pricePerSeat !== null) {
+      request.pricePerSeat = rideData.pricePerSeat;
+    }
+
     return this.http.post<BackendRide>(`${this.apiUrl}/create`, request).pipe(
         map(ride => this.mapBackendRideToFrontend(ride)),
         catchError(error => {
@@ -221,9 +226,10 @@ export class RideService {
       departureDate: new Date(backendRide.departureDate),
       departureTime: '08:00', // or map from backend if provided
       availableSeats: backendRide.availableSeats,
-      totalSeats: backendRide.totalSeats, // ✅ use the correct value
+      totalSeats: backendRide.totalSeats,
+      pricePerSeat: backendRide.pricePerSeat,
       status: backendRide.status as RideStatus,
-      passengers: Array(backendRide.totalSeats - backendRide.availableSeats).fill({} as User), // optional, just to have a length
+      passengers: Array(backendRide.totalSeats - backendRide.availableSeats).fill({} as User),
       createdAt: new Date(backendRide.createdAt)
     };
   }

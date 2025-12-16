@@ -143,7 +143,6 @@ export class RoleSelectionComponent {
     // Update user role in auth store
     this.authStore.updateUserRole(role);
     
-    // Navigate to appropriate dashboard
     if (role === UserRole.DRIVER) {
       this.router.navigate(['/driver/dashboard']);
     } else if (role === UserRole.PASSENGER) {

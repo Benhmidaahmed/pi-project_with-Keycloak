@@ -28,6 +28,11 @@ public class RideServiceImpl implements RideService {
         ride.setAvailableSeats(request.getAvailableSeats());
         ride.setTotalSeats(request.getAvailableSeats());
         ride.setDriverId(request.getDriverId());
+
+        if (request.getPricePerSeat() != null) {
+            ride.setPricePerSeat(request.getPricePerSeat());
+        }
+
         ride.setCreatedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.SCHEDULED);
 

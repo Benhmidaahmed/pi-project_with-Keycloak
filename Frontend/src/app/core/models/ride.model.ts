@@ -16,15 +16,16 @@ export enum RideStatus {
 export interface Ride {
   id: string;
   driverId: string;
-  driver?: User; // Optional - may not be populated from backend
+  driver?: User;
   departureCity: string;
   destinationCity: string;
   departureDate: Date;
   departureTime: string;
   availableSeats: number;
   totalSeats: number;
+  pricePerSeat?: number;
   status: RideStatus;
-  passengers?: Booking[]; // Optional - may not be populated from backend
+  passengers?: Booking[];
   createdAt: Date;
 }
 
@@ -45,11 +46,10 @@ export enum BookingStatus {
 export interface Booking {
   id: string;
   rideId: string;
-  ride?: Ride; // Optional - may not be populated from backend
+  ride?: Ride;
   passengerId: string;
-  passenger?: User; // Optional - may not be populated from backend
+  passenger?: User;
   status: BookingStatus;
   seatsRequested: number;
   createdAt: Date;
 }
-

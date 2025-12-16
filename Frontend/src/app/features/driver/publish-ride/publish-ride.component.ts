@@ -86,6 +86,16 @@ import { CardComponent } from '../../../shared/components/card/card.component';
                 [required]="true"
                 [error]="getErrorMessage('availableSeats')"
             />
+
+            <app-input
+                id="pricePerSeat"
+                label="Price per Seat (TND)"
+                type="number"
+                placeholder="15.00"
+                formControlName="pricePerSeat"
+                [required]="false"
+                [error]="getErrorMessage('pricePerSeat')"
+            />
           </div>
 
           @if (errorMessage) {
@@ -138,7 +148,8 @@ export class PublishRideComponent {
       destinationCity: ['', [Validators.required]],
       departureDate: ['', [Validators.required]],
       departureTime: ['', [Validators.required]],
-      availableSeats: [null, [Validators.required, Validators.min(1)]]
+      availableSeats: [null, [Validators.required, Validators.min(1)]],
+      pricePerSeat: [null, [Validators.min(0)]]
     });
   }
 
@@ -163,7 +174,7 @@ export class PublishRideComponent {
       return;
     }
 
-    const rideData = {
+    const rideData: any = {
       driverId: user.id,
       driver: user,
       departureCity: formValue.departureCity,
@@ -174,6 +185,10 @@ export class PublishRideComponent {
       totalSeats: formValue.availableSeats
     };
 
+    // Add pricePerSeat only if it's provided and greater than 0
+    if (formValue.pricePerSeat !== null && formValue.pricePerSeat !== undefined && formValue.pricePerSeat > 0) {
+      rideData.pricePerSeat = formValue.pricePerSeat;
+    }
 
     // Call service for API call, then update store with state
     this.rideService.createRide(rideData).subscribe({

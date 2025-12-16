@@ -1,106 +1,79 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { Notification, NotificationType } from '../models/notification.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Notification } from '../models/notification.model';
+import { environment } from '../../../environments/environment';
 
-/**
- * Notification Service
- * 
- * Handles notification API calls only.
- * Does NOT manage state - use NotificationsStore for state management.
- * 
- * NOTE: Currently uses mock data as there is no notification microservice in the backend.
- * In production, this would make HTTP calls to a notification service endpoint.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  // Mock notifications data storage
-  // TODO: Replace with HTTP calls when notification microservice is implemented
-  private mockNotifications: Notification[] = [];
 
-  constructor() {}
+  private readonly apiUrl = `${environment.apiUrl}${environment.services.notifications}`;
+
+  constructor(private http: HttpClient) {}
 
   /**
-   * Get notifications for a user
-   * Makes API call to fetch user notifications
-   * 
-   * @param userId The user ID
-   * @returns Observable with array of user notifications
+   * Get notifications for a specific user
    */
   getUserNotifications(userId: string): Observable<Notification[]> {
-    const notifications = this.mockNotifications
-      .filter(n => n.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    return of(notifications).pipe(delay(200));
+    return this.http.get<Notification[]>(`${this.apiUrl}/${userId}`);
   }
 
   /**
-   * Get all notifications
-   * Makes API call to fetch all notifications
-   * 
-   * @returns Observable with array of all notifications
+   * Get all notifications (optional)
    */
   getAllNotifications(): Observable<Notification[]> {
-    return of([...this.mockNotifications]).pipe(delay(200));
+    return this.http.get<Notification[]>(this.apiUrl);
   }
 
   /**
    * Create a new notification
-   * Makes API call to create a notification
-   * 
-   * @param notification Partial notification data
-   * @returns Observable with the created notification
-   * 
-   * Note: State management should be handled by NotificationsStore
+   * Backend automatically sets status = UNREAD
    */
-  createNotification(notification: Partial<Notification>): Observable<Notification> {
-    const newNotification: Notification = {
-      id: Date.now().toString(),
-      userId: notification.userId || '',
-      type: notification.type || NotificationType.BOOKING_REQUEST,
-      title: notification.title || '',
-      message: notification.message || '',
-      read: false,
-      relatedId: notification.relatedId,
-      createdAt: new Date()
-    };
-
-    // Mock API call - in real app, this would POST to backend
-    this.mockNotifications.push(newNotification);
-    return of(newNotification).pipe(delay(100));
+  createNotification(notification: { userId: string; message: string }): Observable<Notification> {
+    return this.http.post<Notification>(this.apiUrl, notification);
   }
 
   /**
-   * Mark notification as read
-   * Makes API call to mark a notification as read
-   * 
-   * @param notificationId The notification ID
-   * @returns Observable that completes when notification is marked as read
+   * Update the status of a notification
    */
-  markAsRead(notificationId: string): Observable<void> {
-    const notification = this.mockNotifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-    }
-    return of(void 0).pipe(delay(100));
+  updateStatus(notificationId: string, status: 'READ' | 'UNREAD'): Observable<Notification> {
+    return this.http.put<Notification>(
+        `${this.apiUrl}/${notificationId}/status`,
+        null,
+        { params: { status } }
+    );
   }
 
   /**
-   * Mark all notifications as read
-   * Makes API call to mark all user notifications as read
-   * 
-   * @param userId The user ID
-   * @returns Observable that completes when all notifications are marked as read
+   * Mark a notification as read
+   */
+  markAsRead(notificationId: string): Observable<Notification> {
+    return this.updateStatus(notificationId, 'READ');
+  }
+
+  /**
+   * Mark all notifications as read for a user
    */
   markAllAsRead(userId: string): Observable<void> {
-    this.mockNotifications.forEach(n => {
-      if (n.userId === userId && !n.read) {
-        n.read = true;
-      }
+    return new Observable(observer => {
+      this.getUserNotifications(userId).subscribe(notifications => {
+        const unread = notifications.filter(n => n.status !== 'READ');
+
+        if (unread.length === 0) {
+          observer.complete();
+          return;
+        }
+
+        let completed = 0;
+        unread.forEach(n => {
+          this.markAsRead(n.id).subscribe(() => {
+            completed++;
+            if (completed === unread.length) observer.complete();
+          });
+        });
+      });
     });
-    return of(void 0).pipe(delay(100));
   }
 }
-

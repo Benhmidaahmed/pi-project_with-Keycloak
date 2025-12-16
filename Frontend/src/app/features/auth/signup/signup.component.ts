@@ -230,7 +230,7 @@ export class SignupComponent {
   selectedRole = signal<UserRole | null>(null);
   loading = false;
   errorMessage = '';
-  UserRole = UserRole; // Expose enum to template
+  UserRole = UserRole;
 
   constructor(
     private fb: FormBuilder,
@@ -261,7 +261,6 @@ export class SignupComponent {
     this.selectedRole.set(role);
     this.signupForm.patchValue({ role });
     
-    // Update validators for driver fields
     if (role === UserRole.DRIVER) {
       this.signupForm.get('cin')?.setValidators([Validators.required]);
       this.signupForm.get('vehicleBrand')?.setValidators([Validators.required]);
@@ -319,7 +318,6 @@ export class SignupComponent {
 
       this.authService.register(userData).subscribe({
         next: (response) => {
-          // CRITICAL FIX: Update AuthStore state (this also handles localStorage via effect)
           this.authStore.setAuthenticatedUser(response.user, response.token);
 
           // Navigate based on role
