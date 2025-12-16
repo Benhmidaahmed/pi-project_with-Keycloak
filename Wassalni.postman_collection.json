@@ -1,0 +1,232 @@
+{
+  "info": {
+    "name": "Wassalni Microservices with Keycloak",
+    "description": "Collection pour tester les microservices Wassalni avec authentification Keycloak",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "auth_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "realm",
+      "value": "wassalni-realm"
+    },
+    {
+      "key": "client_id",
+      "value": "wassalni-app"
+    },
+    {
+      "key": "client_secret",
+      "value": "wassalni-secret-key-2024"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Token (via Auth Service)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+                  "    console.log(\"Token saved successfully!\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"passenger@wassalni.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/token",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "auth", "token"]
+            }
+          }
+        },
+        {
+          "name": "Register Passenger",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newpassenger@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+21612345678\",\n  \"gender\": \"MALE\",\n  \"userType\": \"PASSENGER\",\n  \"preferredPaymentMethod\": \"CASH\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/register",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register Driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newdriver@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+21698765432\",\n  \"gender\": \"FEMALE\",\n  \"userType\": \"DRIVER\",\n  \"licenseNumber\": \"DRV987654\",\n  \"vehicleNumber\": \"VEH456\",\n  \"vehiclePlate\": \"TUN-5678\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/register",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/authentication-service/api/auth/users",
+              "host": ["{{base_url}}"],
+              "path": ["authentication-service", "api", "auth", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Booking Service",
+      "item": [
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/booking-service/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["booking-service", "api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-id-here\",\n  \"driverId\": \"driver-id-here\",\n  \"pickupLocation\": \"Tunis Centre\",\n  \"dropoffLocation\": \"Aéroport Tunis-Carthage\",\n  \"scheduledTime\": \"2024-12-20T10:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/booking-service/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["booking-service", "api", "bookings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Review Service",
+      "item": [
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/review-service/api/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["review-service", "api", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"ride-id-here\",\n  \"userId\": \"user-id-here\",\n  \"rating\": 5,\n  \"comment\": \"Excellent service!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/review-service/api/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["review-service", "api", "reviews"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
