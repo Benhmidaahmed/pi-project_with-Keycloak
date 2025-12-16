@@ -42,10 +42,21 @@ public class AuthenticationController {
             String username = payload.get("username");
             String password = payload.get("password");
             
+            if (username == null || password == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error", 
+                    "message", "Username and password are required"
+                ));
+            }
+            
             Map<String, Object> tokenResponse = keycloakService.getToken(username, password);
             return ResponseEntity.ok(tokenResponse);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "Authentication failed"));
+        } catch (RuntimeException e) {
+            // Return the actual error message for debugging
+            return ResponseEntity.status(401).body(Map.of(
+                "status", "error", 
+                "message", e.getMessage()
+            ));
         }
     }
 

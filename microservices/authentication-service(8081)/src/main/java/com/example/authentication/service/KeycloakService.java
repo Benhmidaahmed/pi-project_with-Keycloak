@@ -133,17 +133,29 @@ public class KeycloakService {
             ResponseEntity<Map> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                // Get user info from MongoDB
-                AppUser user = authenticationService.getUserByEmail(username);
-                
                 Map<String, Object> result = new HashMap<>(response.getBody());
-                result.put("user", user);
-                result.put("status", "success");
                 
+                // Try to get user info from MongoDB (optional - user might not exist in MongoDB yet)
+                try {
+                    AppUser user = authenticationService.getUserByEmail(username);
+                    result.put("user", user);
+                } catch (Exception e) {
+                    // User doesn't exist in MongoDB yet, but Keycloak authentication succeeded
+                    // This is fine for test users imported from realm-export.json
+                    result.put("user", null);
+                }
+                
+                result.put("status", "success");
                 return result;
             } else {
                 throw new RuntimeException("Failed to authenticate");
             }
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            // This catches 401 errors from Keycloak
+            throw new RuntimeException("Invalid credentials or Keycloak authentication failed: " + e.getMessage(), e);
+        } catch (org.springframework.web.client.ResourceAccessException e) {
+            // This catches connection errors to Keycloak
+            throw new RuntimeException("Cannot connect to Keycloak server at " + serverUrl + ". Please ensure Keycloak is running.", e);
         } catch (Exception e) {
             throw new RuntimeException("Authentication failed: " + e.getMessage(), e);
         }
