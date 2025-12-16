@@ -5,7 +5,7 @@ Ce guide explique comment déployer et configurer Keycloak pour l'authentificati
 ## Prérequis
 
 - Docker et Docker Compose installés
-- Java 21
+- Java 17 (OpenJDK ou Oracle JDK)
 - Maven 3.x
 - Ports disponibles : 8080 (Keycloak), 8081-8089 (Microservices), 27017 (MongoDB)
 

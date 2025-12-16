@@ -195,7 +195,7 @@ public void migrateUsersToKeycloak() {
 ### Checklist Pré-Déploiement
 
 - [ ] Changer les mots de passe par défaut (admin/admin)
-- [ ] Changer le client secret
+- [ ] **IMPORTANT** : Changer le client secret dans `keycloak-config/realm-export.json` et dans les fichiers `application.properties` de tous les microservices
 - [ ] Configurer HTTPS pour Keycloak
 - [ ] Configurer SSL/TLS pour les connexions
 - [ ] Activer `sslRequired: external` dans le realm
@@ -212,13 +212,23 @@ public void migrateUsersToKeycloak() {
 KEYCLOAK_SERVER_URL=https://keycloak.votredomaine.com
 KEYCLOAK_REALM=wassalni-realm
 KEYCLOAK_CLIENT_ID=wassalni-app
-KEYCLOAK_CLIENT_SECRET=<VOTRE_SECRET_SECURISE>
+KEYCLOAK_CLIENT_SECRET=<VOTRE_SECRET_SECURISE>  # Générez un secret fort avec: openssl rand -base64 32
 
 # Base de données Keycloak (PostgreSQL recommandé)
 KC_DB=postgres
 KC_DB_URL=jdbc:postgresql://localhost:5432/keycloak
 KC_DB_USERNAME=keycloak
 KC_DB_PASSWORD=<MOT_DE_PASSE_SECURISE>
+```
+
+### Générer un Secret Sécurisé pour Production
+
+```bash
+# Générer un client secret fort
+openssl rand -base64 32
+
+# Ou utiliser UUID
+uuidgen
 ```
 
 ## Maintenance

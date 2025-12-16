@@ -73,7 +73,10 @@ public class KeycloakService {
             var response = keycloak.realm(realm).users().create(user);
             
             if (response.getStatus() == 201) {
-                String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+                // Extract user ID from Location header more reliably
+                String locationPath = response.getLocation().getPath();
+                String[] pathSegments = locationPath.split("/");
+                String userId = pathSegments[pathSegments.length - 1];
                 
                 // Assign role based on user type
                 assignRoleToUser(userId, request.userType().toString());

@@ -45,7 +45,13 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+            if (realmAccess == null || !realmAccess.containsKey("roles")) {
+                return java.util.Collections.emptyList();
+            }
             Collection<String> roles = (Collection<String>) realmAccess.get("roles");
+            if (roles == null) {
+                return java.util.Collections.emptyList();
+            }
             return roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                     .collect(Collectors.toList());
