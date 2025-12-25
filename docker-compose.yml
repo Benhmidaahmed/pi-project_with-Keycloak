@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: dev-file
+    ports:
+      - "8080:8080"
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak-config/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - wassalni-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: wassalni
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - wassalni-network
+
+networks:
+  wassalni-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:

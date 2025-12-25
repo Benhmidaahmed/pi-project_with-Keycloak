@@ -3,6 +3,7 @@ package com.example.authentication.controller;
 import com.example.authentication.dto.CreateAccountRequest;
 import com.example.authentication.entities.AppUser;
 import com.example.authentication.service.AuthenticationService;
+import com.example.authentication.service.KeycloakService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,21 +18,64 @@ import java.util.Map;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final KeycloakService keycloakService;
 
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> register(@RequestBody CreateAccountRequest request) {
+        try {
+            String userId = keycloakService.registerUser(request);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("userId", userId);
+            response.put("status", "success");
+            response.put("message", "User registered successfully. Please login to get your token.");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/token")
+    public ResponseEntity<Map<String, Object>> getToken(@RequestBody Map<String, String> payload) {
+        try {
+            String username = payload.get("username");
+            String password = payload.get("password");
+            
+            if (username == null || password == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error", 
+                    "message", "Username and password are required"
+                ));
+            }
+            
+            Map<String, Object> tokenResponse = keycloakService.getToken(username, password);
+            return ResponseEntity.ok(tokenResponse);
+        } catch (RuntimeException e) {
+            // Return the actual error message for debugging
+            return ResponseEntity.status(401).body(Map.of(
+                "status", "error", 
+                "message", e.getMessage()
+            ));
+        }
+    }
+
+    // Legacy endpoint for backward compatibility (deprecated)
+    @Deprecated
     @PostMapping("/createAccount")
     public ResponseEntity<Map<String, Object>> createAccount(@RequestBody CreateAccountRequest request) {
         AppUser user = authenticationService.createAccount(request);
 
-        String token = "jwt-token-" + user.getId();
-
         Map<String, Object> response = new HashMap<>();
         response.put("user", user);
-        response.put("token", token);
+        response.put("message", "Account created. Please use /api/auth/token to get JWT token from Keycloak");
         response.put("status", "success");
 
         return ResponseEntity.ok(response);
     }
 
+    // Legacy endpoint for backward compatibility (deprecated)
+    @Deprecated
     @PostMapping("/authenticate")
     public ResponseEntity<Map<String, Object>> authenticate(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
@@ -39,13 +83,9 @@ public class AuthenticationController {
 
         boolean success = authenticationService.authenticate(email, password);
         if (success) {
-            AppUser user = authenticationService.getUserByEmail(email);
-            String token = "jwt-token-" + user.getId();
-
             Map<String, Object> response = new HashMap<>();
-            response.put("user", user);
-            response.put("token", token);
-            response.put("status", "success");
+            response.put("message", "Please use /api/auth/token endpoint to get JWT token from Keycloak");
+            response.put("status", "deprecated");
 
             return ResponseEntity.ok(response);
         } else {
